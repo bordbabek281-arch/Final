@@ -1,27 +1,30 @@
-import logging
-import json
+import logging  №Библиотека для записи действий программы в файл.
+import json    #Нужна чтобы сохранять данные в файл и потом их загружать.
 
 logging.basicConfig(
-    filename='shelter.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s'
+    filename='shelter.log',  №все действия записываются в файл shelter.log
+    level=logging.INFO,    №записывать обычные события
+    format='%(asctime)s - %(message)s' №записывать время события
 )
 
-class Animal:
-    def __init__(self, name, age, weight):
-        self.name = name
+class Animal:    №Это общий класс для всех животных.
+    def __init__(self, name, age, weight):  №Создаёт животное.
+        self.name = name   №Это свойства объекта.
         self.age = age
         self.weight = weight
-        self.__health = 100
-        if age < 0:
+        self.__health = 100   №Это значит доступ к ней только внутри класса.
+
+        if age < 0:   №Если возраст меньше 0 — программа выдаст ошибку.
+
             raise ValueError("Возраст не может быть отрицательным")
 
-    def speak(self):
-        return "..."
+    def speak(self):   №Это метод звука.
+        return "..."  №Но базовый класс не знает какой звук, поэтому "...".Потом его переопределят наследники.
 
-    def eat(self, food):
-        self.__health = min(100, self.__health + 10)
-        logging.info(f"{self.name} съел {food}")
+    def eat(self, food): №Животное ест еду.
+
+        self.__health = min(100, self.__health + 10)  №Здоровье увеличивается на 10, но максимум 100.
+        logging.info(f"{self.name} съел {food}")  №Запишется в лог:
 
     def info(self):
         return (
