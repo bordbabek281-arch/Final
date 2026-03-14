@@ -1,0 +1,138 @@
+import logging
+import json
+
+logging.basicConfig(
+    filename='shelter.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s'
+)
+
+class Animal:
+    def __init__(self, name, age, weight):
+        self.name = name
+        self.age = age
+        self.weight = weight
+        self.__health = 100
+        if age < 0:
+            raise ValueError("Возраст не может быть отрицательным")
+
+    def speak(self):
+        return "..."
+
+    def eat(self, food):
+        self.__health = min(100, self.__health + 10)
+        logging.info(f"{self.name} съел {food}")
+
+    def info(self):
+        return (
+            f"Имя: {self.name}, "
+            f"Возраст: {self.age}, "
+            f"Здоровье: {self.__health}"
+        )
+
+    def __str__(self):
+        return self.info()
+
+
+class Dog(Animal):
+    def speak(self):
+        return "Гав!"
+
+    def fetch(self):
+        logging.info(f"{self.name} принёс мяч")
+        return f"{self.name} принёс мяч!"
+
+
+class Cat(Animal):
+    def speak(self):
+        return "Мяу!"
+
+    def purr(self):
+        logging.info(f"{self.name} мурлычет")
+        return f"{self.name} мурр..."
+
+
+class Parrot(Animal):
+    def speak(self):
+        return "Привет!"
+
+    def repeat(self, phrase):
+        logging.info(f"{self.name} повторяет: {phrase}")
+        return f"{self.name} говорит: {phrase}!"
+
+
+class Shelter:
+    def __init__(self):
+        self.animals = []
+
+    def add_animal(self, animal):
+        self.animals.append(animal)
+        logging.info(f"Добавлен {animal.name}, возраст {animal.age}")
+
+    def remove_animal(self, name):
+        animal = self.find_by_name(name)
+        if animal:
+            self.animals.remove(animal)
+            logging.info(f"Удалён {name}")
+        else:
+            logging.warning(f"Животное {name} не найдено")
+
+    def find_by_name(self, name):
+        for animal in self.animals:
+            if animal.name == name:
+                return animal
+        return None
+
+    def show_all(self):
+        for animal in self.animals:
+            print(animal)
+
+    def save_to_file(self, filename):
+        data = []
+        for animal in self.animals:
+            data.append({
+                "type": type(animal).__name__,
+                "name": animal.name,
+                "age": animal.age,
+                "weight": animal.weight
+            })
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        logging.info(f"Данные сохранены в {filename}")
+
+    def load_from_file(self, filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        types = {"Dog": Dog, "Cat": Cat, "Parrot": Parrot}
+        for item in data:
+            cls = types.get(item["type"])
+            if cls:
+                animal = cls(item["name"], item["age"], item["weight"])
+                self.animals.append(animal)
+        logging.info(f"Данные загружены из {filename}")
+
+
+if __name__ == "__main__":
+    shelter = Shelter()
+
+    dog = Dog("Шарик", 3, 10)
+    cat = Cat("Мурзик", 2, 4)
+    parrot = Parrot("Кеша", 5, 1)
+
+    shelter.add_animal(dog)
+    shelter.add_animal(cat)
+    shelter.add_animal(parrot)
+
+    print(dog.speak())
+    print(cat.purr())
+    print(parrot.repeat("Полли хочет есть"))
+
+    dog.eat("косточку")
+
+    shelter.show_all()
+    shelter.save_to_file("animals.json")
+    shelter.remove_animal("Мурзик")
+
+    shelter2 = Shelter()
+    shelter2.load_from_file("animals.json")
+    shelter2.show_all()
